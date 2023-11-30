@@ -2,4 +2,6 @@ import Home from "./Home";
 import Keranjang from "./Keranjang";
 import Profile from "./Profile";
 import ItemDetail from "./ItemDetail";
-export {Home, Keranjang, Profile,ItemDetail}
+import Search from "./Search";
+import ItemSell from "./ItemSell";
+export {Home, Keranjang, Profile,Search,ItemSell,ItemDetail}

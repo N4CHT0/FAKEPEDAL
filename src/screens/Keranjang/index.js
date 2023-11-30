@@ -1,6 +1,6 @@
 import {ScrollView, StyleSheet, Text, View, TouchableOpacity, Image,Animated} from 'react-native';
 import { fontType, colors } from '../../theme';
-import {SearchNormal1} from 'iconsax-react-native';
+import {SearchNormal1,Category, MoneyAdd} from 'iconsax-react-native';
 import { mt2w, re2, p2,  } from '../../assets/img';
 import {useNavigation} from '@react-navigation/native';
 import React, {useRef} from 'react';
@@ -18,7 +18,8 @@ const Keranjang = ({item}) => {
       extrapolate: 'clamp',
     });
     return(
-      <Animated.ScrollView
+      <View>
+              <Animated.ScrollView
       showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
@@ -27,10 +28,10 @@ const Keranjang = ({item}) => {
         contentContainerStyle={{paddingTop: -1}}>
       <View style={styles.container}>
             <Animated.View style={[styles.header,{transform:[{translateY:recentY}]}]}>
-              <View style={styles.bar}>
-                <SearchNormal1 size={18} color={colors.grey(0.5)} variant="Linear" />
-                <Text style={styles.placeholder}>Search</Text>
-              </View>
+              <TouchableOpacity style={styles.bar} onPress={() => navigation.navigate("Search")}>
+                  <SearchNormal1 size={18} color={colors.grey(0.5)} variant="Linear" />
+                  <Text style={styles.placeholder}>Search</Text>
+              </TouchableOpacity>
             </Animated.View>
             <View style={{padding: 6,marginTop: 100,}}>
               <Text style={recent.text}>Recent Search</Text>
@@ -62,6 +63,10 @@ const Keranjang = ({item}) => {
             </View>
           </View>
       </Animated.ScrollView>
+      <TouchableOpacity style={{padding: 20, position:'absolute', top: 630,right: 20, backgroundColor:'white',borderRadius: 20}} onPress={() => navigation.navigate("ItemSell")}>
+          <MoneyAdd size="30"  color="#2D2C2C" variant='Linear'/>
+      </TouchableOpacity>
+      </View>
     );
 };
 
