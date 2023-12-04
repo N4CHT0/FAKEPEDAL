@@ -1,11 +1,12 @@
-import {ScrollView, StyleSheet, Text, View, TouchableOpacity, Image,Animated} from 'react-native';
+import {ScrollView, StyleSheet, Text, View,ActivityIndicator, TouchableOpacity, Image,Animated} from 'react-native';
 import { fontType, colors } from '../../theme';
 import {SearchNormal1,Category, MoneyAdd} from 'iconsax-react-native';
 import { mt2w, re2, p2,  } from '../../assets/img';
-import {useNavigation} from '@react-navigation/native';
-import React, {useRef} from 'react';
-
-const Keranjang = ({item}) => {
+import {useNavigation,useFocusEffect} from '@react-navigation/native';
+import React, {useRef,useState,useCallback} from 'react';
+import axios from 'axios';
+import Item from '../../components/Item';
+const Keranjang = () => {
     const navigation = useNavigation();
     const handleNavigateToItemDetail = () => {
         navigation.navigate('ItemDetail');
@@ -17,9 +18,36 @@ const Keranjang = ({item}) => {
       outputRange: [0, -142],
       extrapolate: 'clamp',
     });
+    const [loading, setLoading] = useState(true);
+    const [productData, setProductData] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+    const getDataProduct = async () => {
+      try {
+        const response = await axios.get(
+          'https://656d3039bcc5618d3c22e189.mockapi.io/product',
+        );
+        setProductData(response.data);
+        setLoading(false)
+      } catch (error) {
+          console.error(error);
+      }
+    };
+    const onRefresh = useCallback(() => {
+      setRefreshing(true);
+      setTimeout(() => {
+        getDataProduct()
+        setRefreshing(false);
+      }, 1500);
+    }, []);
+  
+    useFocusEffect(
+      useCallback(() => {
+        getDataProduct();
+      }, [])
+    );
     return(
       <View>
-              <Animated.ScrollView
+        <Animated.ScrollView
       showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
@@ -37,30 +65,11 @@ const Keranjang = ({item}) => {
               <Text style={recent.text}>Recent Search</Text>
               <Text style={recent.text}>No History Found</Text>
             </View>
-            <TouchableOpacity onPress={handleNavigateToItemDetail}>
-              <View style={{flexDirection: 'row', gap:15, padding: 30, backgroundColor: '#FFF8D4', marginHorizontal: 10, borderRadius: 20, marginVertical: 10}}>
-                <Image style={{width: 120,height: 150}} source={mt2w}></Image>
-                <View>
-                  <Text style={{fontFamily: fontType['Pjs-ExtraBold'],fontSize: 18}}>Boss-MT2W</Text>
-                  <Text style={{fontFamily: fontType['Pjs-Medium'],fontSize: 18}}>Rp.870,000</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-            
-            <View style={{flexDirection: 'row', gap:15, padding: 30, backgroundColor: '#D4FCFF', marginHorizontal: 10, borderRadius: 20, marginVertical: 10}}>
-              <Image style={{width: 120,height: 150}} source={p2}></Image>
-              <View>
-                <Text style={{fontFamily: fontType['Pjs-ExtraBold'],fontSize: 18}}>AMT-P2</Text>
-                <Text style={{fontFamily: fontType['Pjs-Medium'],fontSize: 18}}>Rp.2,000,000</Text>
-              </View>
-            </View>
-            <View style={{flexDirection: 'row', gap:15, padding: 30, backgroundColor: '#FEE9FF', marginHorizontal: 10, borderRadius: 20, marginVertical: 10}}>
-              <Image style={{width: 120,height: 150}} source={re2}></Image>
-              <View>
-                <Text style={{fontFamily: fontType['Pjs-ExtraBold'],fontSize: 18}}>Boss RE2</Text>
-                <Text style={{fontFamily: fontType['Pjs-Medium'],fontSize: 18}}>Rp.1,116,000</Text>
-              </View>
-            </View>
+            {loading ? (
+                <ActivityIndicator size={'large'} color={'black'}/>
+              ) : (
+                productData.map((item, index) => <Item item={item} key={index}/>)
+              )}
           </View>
       </Animated.ScrollView>
       <TouchableOpacity style={{padding: 20, position:'absolute', top: 630,right: 20, backgroundColor:'white',borderRadius: 20}} onPress={() => navigation.navigate("ItemSell")}>

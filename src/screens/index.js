@@ -4,4 +4,5 @@ import Profile from "./Profile";
 import ItemDetail from "./ItemDetail";
 import Search from "./Search";
 import ItemSell from "./ItemSell";
-export {Home, Keranjang, Profile,Search,ItemSell,ItemDetail}
+import ItemEdit from "./ItemEdit";
+export {Home, Keranjang, Profile,Search,ItemSell,ItemDetail,ItemEdit}
