@@ -1,50 +1,57 @@
-import {ScrollView, StyleSheet, Text, View,ActivityIndicator, TouchableOpacity, Image,Animated} from 'react-native';
+import {ScrollView, StyleSheet, Text, View,ActivityIndicator, TouchableOpacity, Image,Animated,RefreshControl} from 'react-native';
 import { fontType, colors } from '../../theme';
 import {SearchNormal1,Category, MoneyAdd} from 'iconsax-react-native';
 import { mt2w, re2, p2,  } from '../../assets/img';
 import {useNavigation,useFocusEffect} from '@react-navigation/native';
-import React, {useRef,useState,useCallback} from 'react';
-import axios from 'axios';
+import React, {useRef,useState,useCallback,useEffect} from 'react';
+import firestore from '@react-native-firebase/firestore';
 import Item from '../../components/Item';
 const Keranjang = () => {
-    const navigation = useNavigation();
-    const handleNavigateToItemDetail = () => {
-        navigation.navigate('ItemDetail');
-    };
-    const scrollY = useRef(new Animated.Value(0)).current;
-    const diffClampY = Animated.diffClamp(scrollY, 0, 142);
-    const recentY = diffClampY.interpolate({
+  const navigation = useNavigation();
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const diffClampY = Animated.diffClamp(scrollY, 0, 142);
+  const recentY = diffClampY.interpolate({
       inputRange: [0, 142],
       outputRange: [0, -142],
       extrapolate: 'clamp',
     });
     const [loading, setLoading] = useState(true);
-    const [productData, setProductData] = useState([]);
+    const [itemData, setItemData] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
-    const getDataProduct = async () => {
-      try {
-        const response = await axios.get(
-          'https://656d3039bcc5618d3c22e189.mockapi.io/product',
-        );
-        setProductData(response.data);
-        setLoading(false)
-      } catch (error) {
-          console.error(error);
-      }
-    };
+    useEffect(() => {
+      const subscriber = firestore()
+        .collection('item')
+        .onSnapshot(querySnapshot => {
+          const item = [];
+          querySnapshot.forEach(documentSnapshot => {
+            item.push({
+              ...documentSnapshot.data(),
+              id: documentSnapshot.id,
+            });
+          });
+          setItemData(item);
+          setLoading(false);
+        });
+      return () => subscriber();
+    }, []);
     const onRefresh = useCallback(() => {
       setRefreshing(true);
       setTimeout(() => {
-        getDataProduct()
+        firestore()
+          .collection('item')
+          .onSnapshot(querySnapshot => {
+            const item = [];
+            querySnapshot.forEach(documentSnapshot => {
+              item.push({
+                ...documentSnapshot.data(),
+                id: documentSnapshot.id,
+              });
+            });
+            setItemData(itemData);
+          });
         setRefreshing(false);
       }, 1500);
     }, []);
-  
-    useFocusEffect(
-      useCallback(() => {
-        getDataProduct();
-      }, [])
-    );
     return(
       <View>
         <Animated.ScrollView
@@ -53,7 +60,10 @@ const Keranjang = () => {
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
           {useNativeDriver: true},
         )}
-        contentContainerStyle={{paddingTop: -1}}>
+        contentContainerStyle={{paddingTop: -1}}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
       <View style={styles.container}>
             <Animated.View style={[styles.header,{transform:[{translateY:recentY}]}]}>
               <TouchableOpacity style={styles.bar} onPress={() => navigation.navigate("Search")}>
@@ -68,7 +78,7 @@ const Keranjang = () => {
             {loading ? (
                 <ActivityIndicator size={'large'} color={'black'}/>
               ) : (
-                productData.map((item, index) => <Item item={item} key={index}/>)
+                itemData.map((item, index) => <Item item={item} key={index}/>)
               )}
           </View>
       </Animated.ScrollView>

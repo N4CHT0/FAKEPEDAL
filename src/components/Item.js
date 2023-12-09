@@ -7,7 +7,7 @@ import axios from 'axios';
 const Item = ({item}) => {
     const navigation = useNavigation();
     return (
-        <TouchableOpacity onPress={() => navigation.navigate('ItemDetail', {productId: item.id})}>
+        <TouchableOpacity onPress={() => navigation.navigate('ItemDetail', {itemId: item.id})}>
             <View style={{flexDirection: 'row', gap:15, padding: 30, backgroundColor: '#FFF8D4', marginHorizontal: 10, borderRadius: 20, marginVertical: 10}}>
                 <FastImage style={styles.image}
                 source={{uri: item?.image,
